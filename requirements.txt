@@ -7,7 +7,7 @@ torch==2.6
 torchvision==0.17.1
 transformers==4.40.1
 accelerate==0.29.3
-bitsandbytes==0.42.0     # 4-bit quantization for the LLM
+bitsandbytes==0.45.2     # 4-bit quantization for the LLM
 datasets==2.19.0
 Pillow==10.3.0
 tqdm==4.66.2
