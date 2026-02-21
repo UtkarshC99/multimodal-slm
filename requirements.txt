@@ -2,7 +2,6 @@
 # Committed to git — do not add ad-hoc pip installs to the notebook.
 # Install with: pip install -r requirements.txt
 
-# triton==2.1.0
 torch==2.6.0
 torchvision==0.21.0
 transformers==4.40.1
