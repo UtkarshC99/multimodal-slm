@@ -2,11 +2,12 @@
 # Committed to git — do not add ad-hoc pip installs to the notebook.
 # Install with: pip install -r requirements.txt
 
+triton==2.1.0
 torch==2.6
 torchvision==0.17.1
 transformers==4.40.1
 accelerate==0.29.3
-bitsandbytes==0.43.1      # 4-bit quantization for the LLM
+bitsandbytes==0.42.0     # 4-bit quantization for the LLM
 datasets==2.19.0
 Pillow==10.3.0
 tqdm==4.66.2
