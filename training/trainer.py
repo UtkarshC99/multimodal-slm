@@ -331,7 +331,7 @@ class Trainer:
 
             for step, batch in enumerate(self.train_loader, 1):
                 loss, loss_dict = self._forward_batch(batch)
-                (loss / self.grad_accum_steps).backward()
+                self.scaler.scale(loss / self.grad_accum_steps).backward()
 
                 for k, v in loss_dict.items():
                     running[k] = running.get(k, 0.0) + v / self.grad_accum_steps
