@@ -1,13 +1,18 @@
-torch>=2.0.0
-torchvision>=0.15.0
-transformers==4.57.3
-accelerate>=0.27.0
-Pillow>=9.0.0
-tqdm>=4.65.0
-numpy>=1.24.0
-scikit-learn>=1.2.0
-matplotlib>=3.7.0
-requests>=2.28.0
-pycocoevalcap>=1.2      # for BLEU/CIDEr captioning metrics
-pycocotools>=2.0.6      # COCO API
-wandb>=0.15.0           # optional, for experiment tracking
+# Pin all versions so installs are reproducible across Colab sessions.
+# Committed to git — do not add ad-hoc pip installs to the notebook.
+# Install with: pip install -r requirements.txt
+
+torch==2.2.1
+torchvision==0.17.1
+transformers==4.40.1
+accelerate==0.29.3
+bitsandbytes==0.43.1      # 4-bit quantization for the LLM
+datasets==2.19.0
+Pillow==10.3.0
+tqdm==4.66.2
+numpy==1.26.4
+scikit-learn==1.4.2
+matplotlib==3.8.4
+requests==2.31.0
+pycocoevalcap==1.2        # BLEU / CIDEr captioning metrics
+pycocotools==2.0.7        # COCO API (also needed by pycocoevalcap)
