@@ -223,6 +223,30 @@ PRESETS = {
         log_every         = 10,
         save_every        = 999999,
     ),
+
+    # ── budget_baseline ───────────────────────────────────────────────────
+    # Purpose : budget-conscious baseline for A100 40GB with 2 epochs.
+    # Data    : 50K samples from COCO train2017 (subset of full 118K).
+    # Runtime : ~12h on A100 40GB (~93 credits).
+    # Pass    : Better generalization than smoke_test, reasonable credit usage.
+    "budget_baseline": ExperimentConfig(
+        experiment_name   = "budget_baseline",
+        adapter_type      = "mlp",
+        use_cls_only      = True,
+        train_split       = "train",       # requires train2017 on Drive
+        num_epochs        = 2,             # 2 epochs as requested
+        max_train_samples = 50000,         # 50K subset for budget control
+        max_val_samples   = 1000,
+        learning_rate     = 2e-4,          # standard baseline LR
+        warmup_ratio      = 0.05,
+        use_contrastive   = True,
+        contrastive_weight= 0.05,           # lower than smoke_test (0.2)
+        batch_size        = 8,             # A100 40GB can handle larger batches
+        grad_accum_steps  = 4,             # effective batch = 32
+        num_workers       = 4,             # more parallelism on A100
+        log_every         = 100,
+        save_every        = 1000,
+    ),
 }
 
 
