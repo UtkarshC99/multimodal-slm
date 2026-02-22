@@ -180,9 +180,18 @@ class Trainer:
         print(f"Trainable parameters : {n_trainable:,}")
         print(f"Output dir           : {self.output_dir}")
 
-        self.optimizer = torch.optim.AdamW(
-            trainable, lr=learning_rate, weight_decay=weight_decay
-        )
+        # Try to use fused 8-bit AdamW if bitsandbytes is available
+        try:
+            import bitsandbytes as bnb
+            self.optimizer = bnb.optim.AdamW8bit(
+                trainable, lr=learning_rate, weight_decay=weight_decay
+            )
+            print("Using 8-bit fused AdamW ✓")
+        except ImportError:
+            self.optimizer = torch.optim.AdamW(
+                trainable, lr=learning_rate, weight_decay=weight_decay
+            )
+            print("Using standard AdamW")
         total_steps   = (len(train_loader) // grad_accum_steps) * num_epochs
         warmup_steps  = max(1, int(warmup_ratio * total_steps))
         print(f"Total opt steps : {total_steps}  |  warmup steps : {warmup_steps}")
@@ -203,10 +212,10 @@ class Trainer:
     # ------------------------------------------------------------------
     def _forward_batch(self, batch: Dict[str, Any]):
         device = self._device()
-        pixel_values    = batch["pixel_values"].to(device)
-        input_ids       = batch["input_ids"].to(device)
-        attention_mask  = batch["attention_mask"].to(device)
-        labels          = batch["labels"].to(device)
+        pixel_values    = batch["pixel_values"].to(device, non_blocking=True)
+        input_ids       = batch["input_ids"].to(device, non_blocking=True)
+        attention_mask  = batch["attention_mask"].to(device, non_blocking=True)
+        labels          = batch["labels"].to(device, non_blocking=True)
 
         with autocast():
             outputs  = self.model(pixel_values=pixel_values, input_ids=input_ids,
@@ -215,20 +224,20 @@ class Trainer:
             losses   = {"lm_loss": lm_loss.item()}
             total    = lm_loss
 
+            # Cache vision embeddings to avoid redundant encode_images() calls
+            vis_emb = None
+            if self.use_contrastive or self.use_l2:
+                vis_emb = self.model.encode_images(pixel_values).mean(dim=1)
+                txt_emb = self.model.lm.get_input_embeddings()(input_ids)
+                mask    = attention_mask.unsqueeze(-1).float()
+                txt_emb = (txt_emb * mask).sum(1) / mask.sum(1).clamp(min=1)
+
             if self.use_contrastive:
-                vis_emb  = self.model.encode_images(pixel_values).mean(dim=1)
-                txt_emb  = self.model.lm.get_input_embeddings()(input_ids)
-                mask     = attention_mask.unsqueeze(-1).float()
-                txt_emb  = (txt_emb * mask).sum(1) / mask.sum(1).clamp(min=1)
                 c_loss   = contrastive_loss(vis_emb, txt_emb.float())
                 total    = total + self.contrastive_weight * c_loss
                 losses["contrastive_loss"] = c_loss.item()
 
             if self.use_l2:
-                vis_emb  = self.model.encode_images(pixel_values).mean(dim=1)
-                txt_emb  = self.model.lm.get_input_embeddings()(input_ids)
-                mask     = attention_mask.unsqueeze(-1).float()
-                txt_emb  = (txt_emb * mask).sum(1) / mask.sum(1).clamp(min=1)
                 a_loss   = l2_alignment_loss(vis_emb.unsqueeze(1), txt_emb.unsqueeze(1))
                 total    = total + self.l2_weight * a_loss
                 losses["l2_loss"] = a_loss.item()
@@ -348,7 +357,7 @@ class Trainer:
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
                 self.scheduler.step()
-                self.optimizer.zero_grad()
+                self.optimizer.zero_grad(set_to_none=True)
                 self.global_step += 1
                 accum_count = 0
 
