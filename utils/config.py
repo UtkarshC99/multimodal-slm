@@ -186,9 +186,9 @@ PRESETS = {
         experiment_name   = "ablation_perceiver",
         adapter_type      = "perceiver",
         use_cls_only      = False,         # all 196 patch tokens fed to perceiver
-        train_split       = "val",
+        train_split       = "train",
         num_epochs        = 5,
-        max_train_samples = 5000,
+        max_train_samples = 20000,
         max_val_samples   = 1000,
         learning_rate     = 5e-5,          # lower LR — cross-attention is sensitive
         warmup_ratio      = 0.05,          # longer warmup for cross-attn stability
@@ -197,7 +197,7 @@ PRESETS = {
         batch_size        = 2,
         grad_accum_steps  = 8,
         num_workers       = 0,
-        log_every         = 10,
+        log_every         = 100,
         save_every        = 999999,
     ),
 
