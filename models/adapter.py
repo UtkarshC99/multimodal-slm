@@ -158,7 +158,7 @@ class VisionLanguageModel(nn.Module):
         if "siglip" in vision_model_name.lower():
             self.vision_encoder = SiglipVisionModel.from_pretrained(vision_model_name)
         else:
-            self.vision_encoder = CLIPVisionModel.from_pretrained(vision_model_name)
+            self.vision_encoder = CLIPVisionModel.from_pretrained(vision_model_name, use_safetensors=True)
         self._freeze(self.vision_encoder)
 
         # ---- Adapter (trainable) -------------------------------------------
