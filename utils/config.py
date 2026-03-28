@@ -187,18 +187,18 @@ PRESETS = {
         adapter_type      = "perceiver",
         use_cls_only      = False,         # all 196 patch tokens fed to perceiver
         train_split       = "train",
-        num_epochs        = 5,
-        max_train_samples = 20000,
+        num_epochs        = 3,
+        max_train_samples = 10000,
         max_val_samples   = 1000,
         learning_rate     = 5e-5,          # lower LR — cross-attention is sensitive
         warmup_ratio      = 0.05,          # longer warmup for cross-attn stability
         use_contrastive   = True,
         contrastive_weight= 0.2,
-        batch_size        = 2,
-        grad_accum_steps  = 8,
+        batch_size        = 4,
+        grad_accum_steps  = 4,
         num_workers       = 0,
         log_every         = 100,
-        save_every        = 999999,
+        save_every        = 1500,
     ),
 
     # ── ablation_contrastive_weight ───────────────────────────────────────
